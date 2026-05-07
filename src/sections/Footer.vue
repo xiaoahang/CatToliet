@@ -1,33 +1,33 @@
 <template>
-  <footer id="footer" class="relative pt-24 pb-8 overflow-hidden" style="background-color: #0A0908;">
+  <footer id="footer" class="relative pt-16 md:pt-24 pb-6 md:pb-8 overflow-hidden" style="background-color: #0A0908;">
     <canvas ref="canvasRef" class="absolute inset-0 w-full h-full pointer-events-none" style="z-index: 1;" />
-    <div class="relative z-10 max-w-7xl mx-auto px-6 md:px-10">
-      <div class="grid md:grid-cols-3 gap-12 mb-16">
+    <div class="relative z-10 max-w-7xl mx-auto px-4 md:px-6 lg:px-10">
+      <div class="grid md:grid-cols-3 gap-8 md:gap-12 mb-10 md:mb-16">
         <div>
-          <div class="flex items-center gap-3 mb-4">
-            <div class="w-8 h-8 rounded-sm flex items-center justify-center" style="background-color: #B87333;">
-              <span class="font-serif-cn text-sm font-bold" style="color: #0A0908;">铝</span>
+          <div class="flex items-center gap-2 md:gap-3 mb-3 md:mb-4">
+            <div class="w-7 h-7 md:w-8 md:h-8 rounded-sm flex items-center justify-center" style="background-color: #B87333;">
+              <span class="font-serif-cn text-xs md:text-sm font-bold" style="color: #0A0908;">铝</span>
             </div>
-            <span class="font-serif-cn text-lg font-semibold tracking-wide" style="color: #F5F0EB;">猫砂柜工坊</span>
+            <span class="font-serif-cn text-base md:text-lg font-semibold tracking-wide" style="color: #F5F0EB;">猫砂柜工坊</span>
           </div>
           <p class="text-sm leading-relaxed" style="color: #8A8580;">
             用工业级铝型材重新定义猫砂柜。<br>为每一只猫咪打造专属空间。
           </p>
         </div>
         <div>
-          <h4 class="font-serif-cn text-sm font-semibold mb-4" style="color: #F5F0EB;">联系我们</h4>
-          <div class="space-y-3">
-            <div class="flex items-center gap-3">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#8A8580" stroke-width="1.5">
+          <h4 class="font-serif-cn text-sm font-semibold mb-3 md:mb-4" style="color: #F5F0EB;">联系我们</h4>
+          <div class="space-y-2 md:space-y-3">
+            <div class="flex items-center gap-2 md:gap-3">
+              <svg width="14" height="14" class="md:w-4 md:h-4" viewBox="0 0 16 16" fill="none" stroke="#8A8580" stroke-width="1.5">
                 <path d="M2 4l6 4 6-4M2 4v8h12V4" />
               </svg>
-              <span class="text-sm" style="color: #8A8580;">hello@catcabinet.workshop</span>
+              <span class="text-xs md:text-sm" style="color: #8A8580;">hello@catcabinet.workshop</span>
             </div>
-            <div class="flex items-center gap-3">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#8A8580" stroke-width="1.5">
+            <div class="flex items-start gap-2 md:gap-3">
+              <svg width="14" height="14" class="md:w-4 md:h-4 shrink-0 mt-0.5" viewBox="0 0 16 16" fill="none" stroke="#8A8580" stroke-width="1.5">
                 <path d="M8 1v3m0 8v3M1 8h3m8 0h3M3.5 3.5l2 2m5 5l2 2M3.5 12.5l2-2m5-5l2-2" />
               </svg>
-              <span class="text-sm" style="color: #8A8580;">上海市徐汇区 · 定制工坊</span>
+              <span class="text-xs md:text-sm leading-relaxed" style="color: #8A8580;">上海市徐汇区 · 定制工坊</span>
             </div>
           </div>
         </div>
@@ -47,13 +47,13 @@
         </div>
       </div>
       <div style="height: 1px; background-color: rgba(245,240,235,0.06);" />
-      <div class="flex flex-col md:flex-row items-center justify-between py-6 gap-4">
-        <p class="text-xs font-sans-en" style="color: rgba(138,133,128,0.5);">
+      <div class="flex flex-col md:flex-row items-center justify-between py-5 md:py-6 gap-3 md:gap-4">
+        <p class="text-[10px] md:text-xs font-sans-en" style="color: rgba(138,133,128,0.5);">
           © 2025 猫砂柜铝型材定制工坊 · Custom Cat Cabinet Workshop
         </p>
-        <div class="flex items-center gap-6">
-          <span class="text-xs transition-colors duration-300 hover:text-[#F5F0EB] cursor-pointer" style="color: #8A8580;">隐私政策</span>
-          <span class="text-xs transition-colors duration-300 hover:text-[#F5F0EB] cursor-pointer" style="color: #8A8580;">使用条款</span>
+        <div class="flex items-center gap-4 md:gap-6">
+          <span class="text-[10px] md:text-xs transition-colors duration-300 hover:text-[#F5F0EB] cursor-pointer" style="color: #8A8580;">隐私政策</span>
+          <span class="text-[10px] md:text-xs transition-colors duration-300 hover:text-[#F5F0EB] cursor-pointer" style="color: #8A8580;">使用条款</span>
         </div>
       </div>
     </div>

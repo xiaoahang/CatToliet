@@ -5,13 +5,15 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "start": "vite",
     "build": "vue-tsc -b && vite build",
+    "build:prod": "vite build",
     "preview": "vite preview",
-    "install:deps": "powershell -ExecutionPolicy Bypass -File ./scripts/install.ps1",
-    "install:deps:clean": "powershell -ExecutionPolicy Bypass -File ./scripts/install.ps1 -Clean",
-    "start": "powershell -ExecutionPolicy Bypass -File ./scripts/dev.ps1",
-    "deploy": "powershell -ExecutionPolicy Bypass -File ./scripts/deploy.ps1",
-    "deploy:local": "powershell -ExecutionPolicy Bypass -File ./scripts/deploy.ps1 -Target local"
+    "setup": "npm install",
+    "copy-images": "cp -r public/images dist/",
+    "predeploy": "npm run build && npm run copy-images",
+    "deploy": "echo 'Deploy dist/ directory to your hosting platform'",
+    "clean": "rm -rf dist"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.2.4",

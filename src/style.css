@@ -5,6 +5,8 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
   }
 
   body {
@@ -14,6 +16,7 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
+    touch-action: pan-y;
   }
 
   ::selection {
@@ -53,43 +56,64 @@
   animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+/* Mobile-friendly range slider */
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
-  height: 6px;
-  border-radius: 3px;
+  height: 8px;
+  border-radius: 4px;
   outline: none;
   cursor: pointer;
+  min-height: 24px;
 }
 
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   background: #B87333;
   cursor: pointer;
   border: 2px solid #F5F0EB;
-  box-shadow: 0 0 0 2px rgba(184, 115, 51, 0.3);
+  box-shadow: 0 0 0 3px rgba(184, 115, 51, 0.3);
   transition: transform 0.2s ease;
 }
 
-input[type="range"]::-webkit-slider-thumb:hover {
-  transform: scale(1.2);
+input[type="range"]::-webkit-slider-thumb:hover,
+input[type="range"]::-webkit-slider-thumb:active {
+  transform: scale(1.25);
 }
 
 input[type="range"]::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   background: #B87333;
   cursor: pointer;
   border: 2px solid #F5F0EB;
-  box-shadow: 0 0 0 2px rgba(184, 115, 51, 0.3);
+  box-shadow: 0 0 0 3px rgba(184, 115, 51, 0.3);
 }
 
-::-webkit-scrollbar { width: 6px; }
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: #0A0908; }
-::-webkit-scrollbar-thumb { background: rgba(184,115,51,0.4); border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: rgba(184,115,51,0.4); border-radius: 2px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(184,115,51,0.6); }
+
+/* Mobile touch optimization */
+@media (max-width: 768px) {
+  button, input[type="range"] {
+    touch-action: manipulation;
+  }
+  
+  input[type="range"]::-webkit-slider-thumb {
+    width: 24px;
+    height: 24px;
+  }
+  
+  input[type="range"]::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+  }
+}
