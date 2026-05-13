@@ -46,7 +46,7 @@ function createTSlotShape(p: number): THREE.Shape {
   const half = p / 2              // 型材半宽（2020=10mm）
   const cr = 0.075 * p            // 四角圆角半径 R1.5mm
   const so = 0.1575 * p           // 槽口半宽 = 6.3/2 = 3.15mm（最窄处）
-  const wall = 0.07 * p           // 壁厚 1.4mm
+  const wall = 0.09 * p           // 壁厚 1.4mm
   const sb = 0.275 * p            // 槽腔底部半宽 = 11/2 = 5.5mm（最宽处）
   const slotDepth = 0.315 * p     // 槽深 6.3mm（从外表面到槽底）
   const sBot = half - slotDepth   // 槽底距中心的坐标 = 10 - 6.3 = 3.7mm
