@@ -1,4 +1,6 @@
 <template>
+  <!-- 鼠标拖尾效果  -->
+  <!-- 已废弃 -->
   <canvas
     ref="canvasRef"
     style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9998; pointer-events: none;"

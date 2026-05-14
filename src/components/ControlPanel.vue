@@ -1,8 +1,9 @@
 <template>
   <div class="p-3 sm:p-4 md:p-6 rounded-lg space-y-3 sm:space-y-4 md:space-y-6" style="background-color: rgba(245,240,235,0.02); border: 1px solid rgba(245,240,235,0.06);">
-    <!-- Dimensions -->
+    <!-- Dimensions 参数选择区域 -->
+     <!-- 1. 尺寸参数  -->
     <div>
-      <h3 class="font-serif-cn text-xs sm:text-sm font-semibold mb-2 sm:mb-3 md:mb-4" style="color: #F5F0EB;">尺寸参数</h3>
+      <h3 class="font-serif-cn text-xs sm:text-sm font-semibold mb-2 sm:mb-3 md:mb-4" style="color: #F5F0EB;">整体尺寸参数</h3>
       <div class="space-y-2 sm:space-y-3 md:space-y-4">
         <div v-for="dim in DIMENSIONS" :key="dim.key">
           <div class="flex justify-between mb-1 sm:mb-1.5 md:mb-2">
@@ -27,44 +28,9 @@
     <div class="divider" />
 
     <!-- Profile -->
+     <!-- 2. 型材规格 -->
     <SelectGroup label="型材规格" :options="PROFILES.map(p => ({ value: p, label: p }))" :active="config.profile" @select="v => onUpdate('profile', v)" />
     <ProfileCrossSection :profile="config.profile" />
-
-    <div class="divider" />
-
-    <!-- Shelves（内部层板 — 移到板材材质上方） -->
-    <ToggleRow label="内部层板" :active="config.hasShelf" @toggle="onUpdate('hasShelf', !config.hasShelf)">
-      <div v-if="config.hasShelf">
-        <div class="flex justify-between mb-1 sm:mb-1.5 md:mb-2">
-          <label class="text-[10px] sm:text-xs" style="color: #8A8580;">层板数量（金属网·交错半宽）</label>
-          <span class="text-[10px] sm:text-xs font-sans-en tabular-nums" style="color: #B87333;">{{ config.shelfCount }}层</span>
-        </div>
-        <input
-          type="range"
-          min="1"
-          max="4"
-          step="1"
-          :value="config.shelfCount"
-          @input="e => onUpdate('shelfCount', Number((e.target as HTMLInputElement).value))"
-          class="w-full rounded-full appearance-none cursor-pointer"
-          style="height: 8px;"
-          :style="{ background: shelfSliderBg(config.shelfCount) }"
-        />
-        <p class="text-[9px] sm:text-[10px] mt-1" style="color: #8A8580;">金属网漏砂板，半宽交替左右分布</p>
-      </div>
-    </ToggleRow>
-
-    <div class="divider" />
-
-    <!-- Panel material（板材材质 — 在层板下方） -->
-    <SelectGroup label="板材材质" :options="PANEL_MATERIALS" :active="config.panelMaterial" @select="v => onUpdate('panelMaterial', v)" />
-
-    <div class="divider" />
-
-    <!-- Top panel -->
-    <SelectGroup label="顶板材质" :options="TOP_PANEL_TYPES" :active="config.topPanelType" @select="v => onUpdate('topPanelType', v)" />
-
-    <div class="divider" />
 
     <!-- Color -->
     <div>
@@ -93,12 +59,37 @@
 
     <div class="divider" />
 
-    <!-- Wheels -->
+    <!-- 3. 板材材质 -->
+    <SelectGroup label="顶板材质" :options="TOP_PANEL_TYPES" :active="config.topPanelType" @select="v => onUpdate('topPanelType', v)" />
+    <SelectGroup label="侧板板材" :options="PANEL_MATERIALS" :active="config.panelMaterial" @select="v => onUpdate('panelMaterial', v)" />
+    <ToggleRow label="内部层板" :active="config.hasShelf" @toggle="onUpdate('hasShelf', !config.hasShelf)">
+      <div v-if="config.hasShelf">
+        <div class="flex justify-between mb-1 sm:mb-1.5 md:mb-2">
+          <label class="text-[10px] sm:text-xs" style="color: #8A8580;">层板数量（金属网漏砂板，半宽交替左右分布）</label>
+          <span class="text-[10px] sm:text-xs font-sans-en tabular-nums" style="color: #B87333;">{{ config.shelfCount }}层</span>
+        </div>
+        <input
+          type="range"
+          min="1"
+          max="4"
+          step="1"
+          :value="config.shelfCount"
+          @input="e => onUpdate('shelfCount', Number((e.target as HTMLInputElement).value))"
+          class="w-full rounded-full appearance-none cursor-pointer"
+          style="height: 8px;"
+          :style="{ background: shelfSliderBg(config.shelfCount) }"
+        />
+      </div>
+    </ToggleRow>
+
+    <div class="divider" />
+
+    <!-- 4. 底部万向轮 Wheels -->
     <ToggleRow label="底部万向轮" :active="config.hasWheels" @toggle="onUpdate('hasWheels', !config.hasWheels)">
       <p class="text-[9px] sm:text-[10px]" style="color: #8A8580;">万向轮直接连接型材立柱底部（2带刹车+2不带）</p>
     </ToggleRow>
 
-    <!-- Summary -->
+    <!-- 5. 预估重量和价格 Summary -->
     <div class="p-2.5 sm:p-3 md:p-4 rounded-lg" style="background-color: rgba(184,115,51,0.08); border: 1px solid rgba(184,115,51,0.2);">
       <div class="flex justify-between items-center">
         <div>

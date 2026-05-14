@@ -1,4 +1,5 @@
 <template>
+  <!-- 材料清单组件  -->
   <div class="rounded-lg overflow-hidden" style="background-color: rgba(245,240,235,0.02); border: 1px solid rgba(245,240,235,0.06);">
     <!-- Header bar -->
     <button @click="show = !show" class="w-full flex items-center justify-between px-3 sm:px-4 md:px-6 py-2.5 sm:py-3 md:py-4 transition-colors duration-300 hover:bg-[rgba(245,240,235,0.03)]">

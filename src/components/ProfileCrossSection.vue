@@ -11,13 +11,13 @@
         <circle cx="0" cy="0" :r="centerHoleR * 1.6" fill="none" stroke="#888" stroke-width="0.15" opacity="0.5" />
       </g>
       <!-- 尺寸标注 -->
-      <!-- 外形宽度标注 -->
+      <!-- 外形宽度标注 （下方横线） -->
       <line :x1="pad" :y1="size + 6" :x2="size + pad" :y2="size + 6" stroke="#B87333" stroke-width="0.5" />
       <line :x1="pad" :y1="size + 5" :x2="pad" :y2="size + 7" stroke="#B87333" stroke-width="0.5" />
       <line :x1="size + pad" :y1="size + 5" :x2="size + pad" :y2="size + 7" stroke="#B87333" stroke-width="0.5" />
       <text :x="size / 2 + pad" :y="size + 10" text-anchor="middle" fill="#B87333" font-size="2"
         font-family="sans-serif" font-weight="bold">{{ 2 * p }}mm</text>
-      <!-- 槽深标注（右侧竖线） -->
+      <!-- 槽口宽标注（右侧竖线） -->
       <line :x1="size + pad + 3" :y1="pad + p - bottle_neck" :x2="size + pad + 3" :y2="bottle_neck + p + pad"
         stroke="#B87333" stroke-width="0.5" />
       <line :x1="size + pad + 2" :y1="pad + p - bottle_neck" :x2="size + pad + 4" :y2="pad + p - bottle_neck"
@@ -27,7 +27,7 @@
       <text :x="size + pad + 9" :y="size / 2 + pad + 1" text-anchor="middle" fill="#B87333" font-size="2"
         font-family="sans-serif" transform="rotate(90, size+pad+8, size/2+pad+1)"> {{ 2 * bottle_neck }}mm</text>
     </svg>
-    <p class="text-[10px] mt-1" style="color: #8A8580;">欧标{{ label }} T-slot 截面</p>
+    <p class="text-[10px] mt-1" style="color: #8A8580;">欧标{{ label }}L T-slot 截面</p>
   </div>
 </template>
 
@@ -44,8 +44,13 @@ const p = computed(() => {
   return map[props.profile] || 10
 })
 
+
+const slope_wall_thickness = computed(() => {
+  const map: Record<string, number> = { '2020': 1.4, '3030': 2.2, '4040': 2.2 }
+  return map[props.profile] || 1.4
+})
+
 const label = computed(() => props.profile)
-// const pad = 4  // SVG 边距
 const pad = computed(() => {
   const map: Record<string, number> = { '2020': 4, '3030': 6, '4040': 8 }
   return map[props.profile]
@@ -62,13 +67,7 @@ const gTransform = computed(() => {
 /** 截面几何参数 —— 与 cabinetScene.ts 中的 createTSlotShape 保持一致 */
 const half = computed(() => p.value)
 const corner_r = computed(() => p.value * 0.075)     // 四角圆角 R1.5
-const min_neck = computed(() => p.value * 0.1575)    // 槽口半宽 3.15（最窄处6.3）
 const bottle_neck = computed(() => p.value * 0.315)   // 瓶颈 3.15
-const wall = computed(() => p.value * 0.09)    // 壁厚 1.4
-const sb = computed(() => p.value * 0.275)     // 槽腔底部半宽 5.5（最宽处11）
-const slotDepth = computed(() => p.value * 0.315) // 槽深 6.3
-const sBot = computed(() => p.value - slotDepth.value) // 槽底距中心 = 3.7
-const hk = computed(() => p.value * 0.03)      // 钩子外凸 0.6
 const centerHoleR = computed(() => p.value * 0.13)   // 中心孔半径 2.6
 
 /**
@@ -82,50 +81,47 @@ const centerHoleR = computed(() => p.value * 0.13)   // 中心孔半径 2.6
 const outerPath = computed(() => {
   const h = half.value // 10
   const r = corner_r.value // 2.6
-  const min_neck = h * 0.315
+  const wall = h * 0.18
   const neck_depth = h * 0.63
+  const max_neck_width = 1.1 * h
+  const slope_wall = slope_wall_thickness.value / 1.414
 
-  const x0 = min_neck // = 0.315 * 10 = 3.15
+
   const x1 = h - neck_depth // = 10 - 6.3 = 3.7
-  const x2 = h - x0 // = 10 - 3.15 = 6.85
-  const x3 = 0.7 * h
-  // const x4 = h - w // = 10 - 1.8 = 8.2
-  const x4 = h - 1.8 // = 10 - 1.8 = 8.2
-  const x5 = h // =10
+  const x0 = x1 - slope_wall // 斜壁厚度1.4，开根号
 
+  const x2 =  max_neck_width / 2
+  const x3 = x2 + slope_wall // 斜壁厚度1.4，开根号
+
+  const x4 = h - wall // = 10 - 1.8 = 8.2
+  const x5 = h // =10
 
   // 逆时针从左上角绘制
   // bug 这玩意纵坐标方向是向下的
   let d = `M ${-h + r} ${-h}`
   d += ` Q ${-h} ${-h} ${-h} ${-h + r}`  // 左上角
 
+  const edge = (a: number[], b: number[], horiz: boolean) => {
+    for (let i = 0; i < 10; i++) {
+      d += `L ${horiz ? a[i] : b[i]} ${horiz ? b[i] : a[i]} `
+    }
+  }
+  
+  const x_neg =  [-x5, -x4, -x4, -x3, -x1, -x1, -x3, -x4, -x4, -x5]
+  const y_neg = [-x0, -x0, -x2, -x2, -x0,  x0,  x2,  x2,  x0,  x0]
+  const x_pos =   [ x5,  x4,  x4,  x3,  x1,  x1,  x3,  x4,  x4,  x5]
+  const y_pos =  [ x0,  x0,  x2,  x2,  x0, -x0, -x2, -x2, -x0, -x0]
+
+
   // 左边缘
-  d += `L ${-x5} ${-x0}`
-  d += `L ${-x4} ${-x0}`
-  d += `L ${-x4} ${-x2}`
-  d += `L ${-x3} ${-x2}`
-  d += `L ${-x1} ${-x1}`
-  d += `L ${-x1} ${x1}`
-  d += `L ${-x3} ${x2}`
-  d += `L ${-x4} ${x2}`
-  d += `L ${-x4} ${x0}`
-  d += `L ${-x5} ${x0}`
+  edge(x_neg,y_neg,true)
   d += `L ${-x5} ${x5 - r}`
 
   // 左下角
   d += ` Q ${-h} ${h} ${-h + r} ${h}`
 
   // 下边缘
-  d += `L ${-x0} ${x5} `
-  d += `L ${-x0} ${x4} `
-  d += `L ${-x2} ${x4}`
-  d += `L ${-x2} ${x3}`
-  d += `L ${-x1} ${x1}`
-  d += `L ${x1} ${x1}`
-  d += `L ${x2} ${x3}`
-  d += `L ${x2} ${x4}`
-  d += `L ${x0} ${x4}`
-  d += `L ${x0} ${x5}`
+  edge(y_neg,x_pos,true)
   d += `L ${x5 - r} ${x5}`
 
 
@@ -133,32 +129,14 @@ const outerPath = computed(() => {
   d += ` Q ${h} ${h} ${h} ${h - r}`
 
   // 右边缘
-  d += `L ${x5} ${x0}`
-  d += `L ${x4} ${x0}`
-  d += `L ${x4} ${x2}`
-  d += `L ${x3} ${x2}`
-  d += `L ${x1} ${x1}`
-  d += `L ${x1} ${-x1}`
-  d += `L ${x3} ${-x2}`
-  d += `L ${x4} ${-x2}`
-  d += `L ${x4} ${-x0}`
-  d += `L ${x5} ${-x0}`
+  edge(x_pos,y_pos,true)
   d += `L ${x5} ${-x5 + r}`
 
   // 右上角
   d += ` Q ${h} ${-h} ${h - r} ${-h}`
 
   // 顶边缘（槽朝下）：梯形
-  d += `L ${x0} ${-x5} `
-  d += `L ${x0} ${-x4} `
-  d += `L ${x2} ${-x4}`
-  d += `L ${x2} ${-x3}`
-  d += `L ${x1} ${-x1}`
-  d += `L ${-x1} ${-x1}`
-  d += `L ${-x2} ${-x3}`
-  d += `L ${-x2} ${-x4}`
-  d += `L ${-x0} ${-x4}`
-  d += `L ${-x0} ${-x5}`
+  edge(y_pos,x_neg,true)
   d += `L ${-x5 + r} ${-x5}`
 
 
