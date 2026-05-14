@@ -1,147 +1,174 @@
 <template>
   <div class="mt-3 flex flex-col items-center">
-    <svg :viewBox="vb" class="w-full max-w-[180px]" style="aspect-ratio: 1;">
+    <svg :viewBox="viewBox" class="w-full max-w-[180px]" style="aspect-ratio: 1;">
       <!-- 将坐标系原点移到型材中心，确保完整截面可见 -->
-      <g :transform="gTransform">
+      <g :transform="groupTransform">
         <!-- 型材外轮廓：正方形 + 四面 T-slot 梯形槽 + 四角圆角 -->
         <path :d="outerPath" fill="#B8B8B8" stroke="#444" stroke-width="0.4" />
         <!-- 中心 Ø5.2mm 通孔 -->
-        <circle cx="0" cy="0" :r="centerHoleR" fill="#2A2520" stroke="#666" stroke-width="0.3" />
-        <!-- 内壁辅助圆（装饰性细节） -->
-        <circle cx="0" cy="0" :r="centerHoleR * 1.6" fill="none" stroke="#888" stroke-width="0.15" opacity="0.5" />
+        <circle cx="0" cy="0" :r="spec.centerHoleR" fill="#2A2520" stroke="#666" stroke-width="0.3" />
       </g>
       <!-- 尺寸标注 -->
-      <!-- 外形宽度标注 （下方横线） -->
-      <line :x1="pad" :y1="size + 6" :x2="size + pad" :y2="size + 6" stroke="#B87333" stroke-width="0.5" />
-      <line :x1="pad" :y1="size + 5" :x2="pad" :y2="size + 7" stroke="#B87333" stroke-width="0.5" />
-      <line :x1="size + pad" :y1="size + 5" :x2="size + pad" :y2="size + 7" stroke="#B87333" stroke-width="0.5" />
-      <text :x="size / 2 + pad" :y="size + 10" text-anchor="middle" fill="#B87333" font-size="2"
-        font-family="sans-serif" font-weight="bold">{{ 2 * p }}mm</text>
+      <!-- 外形宽度标注（下方横线） -->
+      <text font-size=2>outerSize{{ outerSize }} pad{{ pad }}</text> 
+      <line :x1="pad" :y1="outerSize + pad  +2" :x2="outerSize + pad" :y2="outerSize + 6" stroke="#B87333" stroke-width="0.5" />
+      <line :x1="pad" :y1="outerSize + 5" :x2="pad" :y2="outerSize + 7" stroke="#B87333" stroke-width="0.5" />
+      <line :x1="outerSize + pad" :y1="outerSize + 5" :x2="outerSize + pad" :y2="outerSize + 7" stroke="#B87333" stroke-width="0.5" />
+      <text :x="outerSize / 2 + pad" :y="outerSize + 10" text-anchor="middle" fill="#B87333" font-size="2" font-family="sans-serif" font-weight="bold">
+        {{ 2 * spec.p }}mm
+      </text>
+
       <!-- 槽口宽标注（右侧竖线） -->
-      <line :x1="size + pad + 3" :y1="pad + p - bottle_neck" :x2="size + pad + 3" :y2="bottle_neck + p + pad"
-        stroke="#B87333" stroke-width="0.5" />
-      <line :x1="size + pad + 2" :y1="pad + p - bottle_neck" :x2="size + pad + 4" :y2="pad + p - bottle_neck"
-        stroke="#B87333" stroke-width="0.5" />
-      <line :x1="size + pad + 2" :y1="bottle_neck + p + pad" :x2="size + pad + 4" :y2="bottle_neck + p + pad"
-        stroke="#B87333" stroke-width="0.5" />
-      <text :x="size + pad + 9" :y="size / 2 + pad + 1" text-anchor="middle" fill="#B87333" font-size="2"
-        font-family="sans-serif" transform="rotate(90, size+pad+8, size/2+pad+1)"> {{ 2 * bottle_neck }}mm</text>
+      <line :x1="outerSize + pad + 3" :y1="pad + spec.p - bottleNeck" :x2="outerSize + pad + 3" :y2="bottleNeck + spec.p + pad" stroke="#B87333" stroke-width="0.5" />
+      <line :x1="outerSize + pad + 2" :y1="pad + spec.p - bottleNeck" :x2="outerSize + pad + 4" :y2="pad + spec.p - bottleNeck" stroke="#B87333" stroke-width="0.5" />
+      <line :x1="outerSize + pad + 2" :y1="bottleNeck + spec.p + pad" :x2="outerSize + pad + 4" :y2="bottleNeck + spec.p + pad" stroke="#B87333" stroke-width="0.5" />
+      <text :x="outerSize + pad + 9" :y="outerSize / 2 + pad + 1" text-anchor="middle" fill="#B87333" font-size="2" font-family="sans-serif"
+        :transform="`rotate(90, ${outerSize + pad + 8}, ${outerSize / 2 + pad + 1})`">
+        {{ 2 * bottleNeck }}mm
+      </text>
     </svg>
-    <p class="text-[10px] mt-1" style="color: #8A8580;">欧标{{ label }}L T-slot 截面</p>
+    <p class="text-[10px] mt-1" style="color: #8A8580;">欧标{{ spec.label }}L T-slot 截面</p>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
 
+interface ProfileSpec {
+  label: string
+  p: number        // 半宽
+  h: number        // 半高（等于 p）
+  wallThickness: number
+  pad: number      // SVG 绘图边距
+  centerHoleR: number
+}
+
+const PROFILE_MAP: Record<string, Omit<ProfileSpec, 'label' | 'h' | 'centerHoleR'>> = {
+  '2020': { p: 10, wallThickness: 1.4, pad: 4 },
+  '3030': { p: 15, wallThickness: 2.2, pad: 6 },
+  '4040': { p: 20, wallThickness: 2.2, pad: 8 },
+}
+
 const props = defineProps<{
   profile: string // '2020' | '3030' | '4040'
 }>()
 
-/** 型材规格对应的半宽（SVG 坐标系用） */
-const p = computed(() => {
-  const map: Record<string, number> = { '2020': 10, '3030': 15, '4040': 20 }
-  return map[props.profile] || 10
-})
-
-
-const slope_wall_thickness = computed(() => {
-  const map: Record<string, number> = { '2020': 1.4, '3030': 2.2, '4040': 2.2 }
-  return map[props.profile] || 1.4
-})
-
-const label = computed(() => props.profile)
-const pad = computed(() => {
-  const map: Record<string, number> = { '2020': 4, '3030': 6, '4040': 8 }
-  return map[props.profile]
-}).value
-
-const size = computed(() => p.value * 2)
-const vb = computed(() => `0 0 ${size.value + pad * 2 + 10} ${size.value + pad * 2 + 7}`)
-const gTransform = computed(() => {
-  const cx = p.value + pad
-  const cy = p.value + pad
-  return `translate(${cx}, ${cy})`
-})
-
-/** 截面几何参数 —— 与 cabinetScene.ts 中的 createTSlotShape 保持一致 */
-const half = computed(() => p.value)
-const corner_r = computed(() => p.value * 0.075)     // 四角圆角 R1.5
-const bottle_neck = computed(() => p.value * 0.315)   // 瓶颈 3.15
-const centerHoleR = computed(() => p.value * 0.13)   // 中心孔半径 2.6
-
-/**
- * SVG path —— 完整的四面 T-slot 梯形截面
- * 
- * 梯形槽腔特征：
- * - 开口/颈部：6.3mm（最窄，半宽 so=3.15）
- * - 斜壁扩宽 → 腔体底部：11mm（最宽，半宽 sb=5.5）
- * - 底部钩子：R0.6 圆弧（T-slot 螺母卡位）
- */
-const outerPath = computed(() => {
-  const h = half.value // 10
-  const r = corner_r.value // 2.6
-  const wall = h * 0.18
-  const neck_depth = h * 0.63
-  const max_neck_width = 1.1 * h
-  const slope_wall = slope_wall_thickness.value / 1.414
-
-
-  const x1 = h - neck_depth // = 10 - 6.3 = 3.7
-  const x0 = x1 - slope_wall // 斜壁厚度1.4，开根号
-
-  const x2 =  max_neck_width / 2
-  const x3 = x2 + slope_wall // 斜壁厚度1.4，开根号
-
-  const x4 = h - wall // = 10 - 1.8 = 8.2
-  const x5 = h // =10
-
-  // 逆时针从左上角绘制
-  // bug 这玩意纵坐标方向是向下的
-  let d = `M ${-h + r} ${-h}`
-  d += ` Q ${-h} ${-h} ${-h} ${-h + r}`  // 左上角
-
-  const edge = (a: number[], b: number[], horiz: boolean) => {
-    for (let i = 0; i < 10; i++) {
-      d += `L ${horiz ? a[i] : b[i]} ${horiz ? b[i] : a[i]} `
-    }
+const spec = computed<ProfileSpec>(() => {
+  const base = PROFILE_MAP[props.profile] ?? PROFILE_MAP['2020']
+  return {
+    label: props.profile,
+    ...base,
+    h: base.p,
+    centerHoleR: base.p * 0.25,
   }
-  
-  const x_neg =  [-x5, -x4, -x4, -x3, -x1, -x1, -x3, -x4, -x4, -x5]
-  const y_neg = [-x0, -x0, -x2, -x2, -x0,  x0,  x2,  x2,  x0,  x0]
-  const x_pos =   [ x5,  x4,  x4,  x3,  x1,  x1,  x3,  x4,  x4,  x5]
-  const y_pos =  [ x0,  x0,  x2,  x2,  x0, -x0, -x2, -x2, -x0, -x0]
+})
 
+const pad = computed(() => spec.value.pad)
+const outerSize = computed(() => spec.value.p * 2)
+const viewBox = computed(() => `0 0 ${outerSize.value + pad.value * 2 + 10} ${outerSize.value + pad.value * 2 + 7}`)
+const groupTransform = computed(() => `translate(${spec.value.p + pad.value}, ${spec.value.p + pad.value})`)
+const bottleNeck = computed(() => spec.value.p * 0.315)
 
-  // 左边缘
-  edge(x_neg,y_neg,true)
-  d += `L ${-x5} ${x5 - r}`
+/** 生成单条边缘的点序列（左上 → 左下、左下 → 右下、右下 → 右上、右上 → 左上） */
+function buildOuterPath(h: number, r: number, wall: number, slopeWall: number): string {
+  const neckDepth = h * 0.63
+  const maxNeckWidth = h * 1.1
 
-  // 左下角
-  d += ` Q ${-h} ${h} ${-h + r} ${h}`
+  // 关键 x 坐标（从中心向外）
+  const x0 = (h - neckDepth) - slopeWall   // 槽口内侧
+  const x1 = h - neckDepth                 // 槽底内侧
+  const x2 = maxNeckWidth / 2              // 槽腔半宽
+  const x3 = x2 + slopeWall                // 槽腔外侧
+  const x4 = h - wall                      // 外壁内侧
+  const x5 = h                             // 外轮廓
 
-  // 下边缘
-  edge(y_neg,x_pos,true)
-  d += `L ${x5 - r} ${x5}`
+  // 四角圆角辅助函数
+  const corner = (sx: number, sy: number, ex: number, ey: number) =>
+    `Q ${sx} ${sy} ${ex} ${ey}`
 
+  // 单条边缘的 polyline：接收 11 个 [x, y] 点，生成 "L x y ..."
+  const edge = (pts: [number, number][]) =>
+    pts.map(([x, y]) => `L ${x.toFixed(2)} ${y.toFixed(2)}`).join(' ')
 
-  // 右下角
-  d += ` Q ${h} ${h} ${h} ${h - r}`
+  // 逆时针方向：左上 → 左下 → 右下 → 右上 → 回到左上
+  // 每条边包含两个对称的 T-slot 槽（上下槽或左右槽）
+  const leftEdge: [number, number][] = [
+    [-x5, -x0],
+    [-x4, -x0],
+    [-x4, -x2],
+    [-x3, -x2],
+    [-x1, -x0],
+    [-x1,  x0],
+    [-x3,  x2],
+    [-x4,  x2],
+    [-x4,  x0],
+    [-x5,  x0],
+    [-x5,  x5 - r],
+  ]
 
-  // 右边缘
-  edge(x_pos,y_pos,true)
-  d += `L ${x5} ${-x5 + r}`
+  const bottomEdge: [number, number][] = [
+    [-x0,  x5],
+    [-x0,  x4],
+    [-x2,  x4],
+    [-x2,  x3],
+    [-x0,  x1],
+    [ x0,  x1],
+    [ x2,  x3],
+    [ x2,  x4],
+    [ x0,  x4],
+    [ x0,  x5],
+    [ x5 - r, x5],
+  ]
 
-  // 右上角
-  d += ` Q ${h} ${-h} ${h - r} ${-h}`
+  const rightEdge: [number, number][] = [
+    [ x5,  x0],
+    [ x4,  x0],
+    [ x4,  x2],
+    [ x3,  x2],
+    [ x1,  x0],
+    [ x1, -x0],
+    [ x3, -x2],
+    [ x4, -x2],
+    [ x4, -x0],
+    [ x5, -x0],
+    [ x5, -x5 + r],
+  ]
 
-  // 顶边缘（槽朝下）：梯形
-  edge(y_pos,x_neg,true)
-  d += `L ${-x5 + r} ${-x5}`
+  const topEdge: [number, number][] = [
+    [ x0, -x5],
+    [ x0, -x4],
+    [ x2, -x4],
+    [ x2, -x3],
+    [ x0, -x1],
+    [-x0, -x1],
+    [-x2, -x3],
+    [-x2, -x4],
+    [-x0, -x4],
+    [-x0, -x5],
+    [-x5 + r, -x5],
+  ]
 
+  // 从左上角圆角开始，逆时针闭合
+  return [
+    `M ${(-h + r).toFixed(2)} ${-h}`,
+    corner(-h, -h, -h, -h + r),
+    edge(leftEdge),
+    corner(-h, h, -h + r, h),
+    edge(bottomEdge),
+    corner(h, h, h, h - r),
+    edge(rightEdge),
+    corner(h, -h, h - r, -h),
+    edge(topEdge),
+    'Z',
+  ].join(' ')
+}
 
-  d += ` Z`
+const outerPath = computed(() => {
+  const { p: h, wallThickness } = spec.value
+  const r = h * 0.075
+  const wall = h * 0.18
+  const slopeWall = wallThickness / 1.414
 
-  return d
+  return buildOuterPath(h, r, wall, slopeWall)
 })
 </script>
